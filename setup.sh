@@ -87,7 +87,7 @@ sleep 2
 
 # Setup Gh
 echo -n -e "Setting up Gh in Termux. \033[0K\r"
-if [ ! $HOME/.config/gh ]; then
+if [ ! -f $HOME/.config/gh ]; then
     gh auth login
     clear
 fi
