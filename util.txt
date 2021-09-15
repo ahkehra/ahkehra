@@ -1,0 +1,12 @@
+nano /data/data/com.termux/files/usr/etc/bash.bashrc
+
+{
+# Check if folder exist
+if [ ! -f $HOME/storage/shared/Termux ]; then
+     mkdir -p $HOME/storage/shared/Termux
+fi
+
+# Startup Home
+cd $HOME/storage/shared/Termux
+
+}
