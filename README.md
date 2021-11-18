@@ -11,4 +11,4 @@
 <p align="center"><a href="https://t.me/AkiraSuper"><img alt="AkiraSuper" src="https://img.shields.io/badge/dynamic/json?logo=telegram&label=%40AkiraSuper&labelColor=282c34&suffix=+members&color=eb0029&query=%24.data.totalSubs&url=https%3A%2F%2Fapi.spencerwoo.com%2Fsubstats%2F%3Fsource%3Dtelegram%26queryKey%3DAkiraSuper&longCache=true"/></a>
 <a href="https://t.me/NexusKernel"><img alt="Nexus Kernel | Updates" src="https://img.shields.io/badge/dynamic/json?logo=telegram&label=%40NexusKernel&labelColor=282c34&suffix=+members&color=eb0029&query=%24.data.totalSubs&url=https%3A%2F%2Fapi.spencerwoo.com%2Fsubstats%2F%3Fsource%3Dtelegram%26queryKey%3DNexusKernel&longCache=true"/></a>
 
-![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=akirasupr&layout=compact&show_icons=true&hide_border=true)](https://github.com/akirasupr)
+![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=akirasupr&layout=compact&show_icons=true&hide_border=true)]
