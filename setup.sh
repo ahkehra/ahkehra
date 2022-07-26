@@ -80,6 +80,11 @@ if [ ! -f $HOME/.gitconfig ]; then
         read -r editor
         git config --global core.editor "${editor}"
     fi
+    if [ ! $(grep "directory" $HOME/.gitconfig) ]; then
+        echo -n "Please enter your safe directory name: "
+        read -r directory
+        git config --global --add safe.directory "${directory}"
+    fi
     clear
 fi
 echo -n -e "Successfully updated Git Credentials \033[0K\r"
