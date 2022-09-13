@@ -11,43 +11,39 @@ clear
 setterm -cursor off
 
 # Get fastest mirrors.
-echo -n -e "Syncing with fastest mirrors. \033[0K\r"
-pkg update -y 2>/dev/null
+echo -n -e "Syncing with fastest mirrors."
+pkg update -y
 
 # Upgrade packages.
-echo -n -e "Upgrading packages. \033[0K\r"
+echo -n -e "Upgrading packages."
 pkg upgrade -o Dpkg::Options::='--force-confnew' -y 2>/dev/null
 
 # Updating package repositories and installing packages.
-echo -n -e "Installing required packages. \033[0K\r"
-pkg install -y curl git gh wget shc aria2 2>/dev/null
-
-# Upgrade packages.
-echo -n -e "Upgrading packages. \033[0K\r"
-pkg upgrade
+echo -n -e "Installing required packages."
+pkg install curl git gh wget shc aria2 -y
 
 # Giving Storage permision to Termux App.
 if [ ! -d $HOME/storage ]; then
-    echo -n -e "Setting up storage access for Termux. \033[0K\r"
+    echo -n -e "Setting up storage access for Termux."
     termux-setup-storage
 fi
 
 # Installing the Ubuntu font for Termux.
 if [ ! -f $HOME/.termux/font.ttf ]; then
-    echo -n -e "Installing Ubuntu font. \033[0K\r"
+    echo -n -e "Installing Ubuntu font."
     curl -fsSL -o $HOME/.termux/font.ttf 'https://raw.githubusercontent.com/akirasup3r/akirasup3r/master/font.ttf'
 fi
 
 # Set a default color scheme.
-echo -n -e "Setting up a new color scheme. \033[0K\r"
+echo -n -e "Setting up a new color scheme."
 curl -fsSL -o $HOME/.termux/colors.properties 'https://raw.githubusercontent.com/akirasup3r/akirasup3r/master/colors.prop'
 
 # Add new buttons to the Termux bottom bar.
-echo -n -e "Setting up some extra keys in Termux. \033[0K\r"
+echo -n -e "Setting up some extra keys in Termux."
 curl -fsSL -o $HOME/.termux/termux.properties 'https://raw.githubusercontent.com/akirasup3r/akirasup3r/master/termux.prop'
 
 # Setup git credentials
-echo -n -e "Setting up Git Credentials in Termux. \033[0K\r"
+echo -n -e "Setting up Git Credentials in Termux."
 if [ ! -f $HOME/.gitconfig ]; then
      git config --global user.name "${username}"
      git config --global user.email "${email}"
@@ -59,13 +55,13 @@ if [ ! -f $HOME/.gitconfig ]; then
         gh auth login
     fi
 fi
-echo -n -e "Successfully updated Git Credentials \033[0K\r"
+echo -n -e "Successfully updated Git Credentials"
 
 # Reload Termux settings.
 termux-reload-settings
 
 # Setup complete.
-echo -n -e "Installation complete! \033[0K\r"
+echo -n -e "Installation complete!"
 
 # Restore cursor.
 setterm -cursor on
