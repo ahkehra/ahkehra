@@ -2,7 +2,7 @@
 username="akirasup3r"
 email="vishal.rockstar7011@gmail.com"
 editor="nano"
-directory="*"
+dir="*"
 
 # Clear the screen
 clear
@@ -16,16 +16,15 @@ pkg update -y 2>/dev/null
 
 # Upgrade packages.
 echo -n -e "Upgrading packages. \033[0K\r"
-apt-get upgrade -o Dpkg::Options::='--force-confnew' -y 2>/dev/null
+pkg upgrade -o Dpkg::Options::='--force-confnew' -y 2>/dev/null
 
 # Updating package repositories and installing packages.
 echo -n -e "Installing required packages. \033[0K\r"
-apt update 2>/dev/null
-apt install -y curl git wget shc aria2 gh 2>/dev/null
+pkg install -y curl git gh wget shc aria2 2>/dev/null
 
 # Upgrade packages.
-echo -n -e "Updating system packages. \033[0K\r"
-pkg upgrade -y 2>/dev/null
+echo -n -e "Upgrading packages. \033[0K\r"
+pkg upgrade
 
 # Giving Storage permision to Termux App.
 if [ ! -d $HOME/storage ]; then
@@ -54,7 +53,7 @@ if [ ! -f $HOME/.gitconfig ]; then
      git config --global user.email "${email}"
      git config --global core.editor "${editor}"
      if [ "$(id -u)" -ne 0 ]; then
-          git config --global --add safe.directory "${directory}"
+          git config --global --add safe.directory "${dir}"
     fi
     if [ ! -f $HOME/.config/gh ]; then
         gh auth login
