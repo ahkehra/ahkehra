@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-username="akirasup3r"
+username="realakeera"
 email="vishal.rockstar7011@gmail.com"
 editor="nano"
 dir="*"
