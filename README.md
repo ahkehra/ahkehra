@@ -4,8 +4,8 @@
 
 #### 🔨 I’m currently working on Kernel Development.
 
-## <img height="50" src="https://raw.githubusercontent.com/realakeera/realakeera/main/assets/cat.gif"/> Links
-[![](https://img.shields.io/badge/-Gmail-c14438?style=flat-square)](mailto:vishal.rockstar7011@gmail.com)
-[![](https://img.shields.io/badge/-twitter-1C9CEA?style=flat-square)](https://mobile.twitter.com/realakeera)
-[![](https://img.shields.io/badge/-Instagram-c13584?style=flat-square)](https://www.instagram.com/realakeera)
+## <img height="50" src="https://raw.githubusercontent.com/realakeera/realakeera/main/assets/cat.gif"/> Reach To Me
+[![](https://img.shields.io/badge/-Gmail-c14438?style=flat-square&logo=gmail&logoColor=white)](mailto:vishal.rockstar7011@gmail.com)
+[![](https://img.shields.io/badge/-Twitter-1C9CEA?style=flat-square&logo=twitter&logoColor=white)](https://mobile.twitter.com/realakeera)
+[![](https://img.shields.io/badge/-Instagram-c13584?style=flat-square&logo=instagram&logoColor=white)](https://www.instagram.com/realakeera)
 [![](https://img.shields.io/badge/Telegram-2CA5E0?style=flat-square&logo=telegram&logoColor=white)](https://t.me/itzakeera)
