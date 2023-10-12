@@ -20,7 +20,7 @@ pkg upgrade -o Dpkg::Options::='--force-confnew' -y 2>/dev/null
 
 # Updating package repositories and installing packages.
 echo -n -e "Installing required packages."
-pkg install curl git gh wget shc aria2 -y
+pkg install git gh -y
 
 # Giving Storage permision to Termux App.
 if [ ! -d $HOME/storage ]; then
