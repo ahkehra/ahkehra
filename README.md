@@ -7,7 +7,7 @@ This is a simple, personal bootstrap script for [Termux](https://github.com/term
 ## Install:
 Installing this is as easy as running the command below in Termux.
 ```shell
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/reallyakera/reallyakera/master/setup.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/oiakera/oiakera/master/setup.sh)"
 ```
 
 Don't worry, the existing `setup` will be backed up in your storage for later. You can find it in the `backup` directory at the location below.
