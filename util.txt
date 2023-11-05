@@ -2,11 +2,11 @@ nano /data/data/com.termux/files/usr/etc/bash.bashrc
 
 {
 # Check if folder exist
-if [ ! -f $HOME/storage/shared/Termux ]; then
-     mkdir -p $HOME/storage/shared/Termux
+if [ ! -f $HOME/storage/downloads/Termux ]; then
+     mkdir -p $HOME/storage/downloads/Termux
 fi
 
 # Startup Home
-cd $HOME/storage/shared/Termux
+cd $HOME/storage/downloads/Termux
 
 }
