@@ -4,7 +4,7 @@
 
 #### 🔨 I’m currently working on Kernel Development.
 
-## <img height="50" src="https://raw.githubusercontent.com/oiakera/oiakera/main/assets/cat.gif"/> Reach To Me
+<img height="50" src="https://raw.githubusercontent.com/oiakera/oiakera/main/assets/cat.gif"/> Reach To Me
 [![](https://img.shields.io/badge/-Gmail-c14438?style=flat-square&logo=gmail&logoColor=white)](mailto:vishal.rockstar7011@gmail.com)
 [![](https://img.shields.io/badge/-Twitter-1C9CEA?style=flat-square&logo=twitter&logoColor=white)](https://mobile.twitter.com/oiakera)
 [![](https://img.shields.io/badge/-Instagram-c13584?style=flat-square&logo=instagram&logoColor=white)](https://www.instagram.com/oiakera)
