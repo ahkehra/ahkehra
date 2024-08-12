@@ -1,6 +1,4 @@
-Hi, there! I'm Akera! <img height="30" src="https://raw.githubusercontent.com/ahkehra/ahkehra/main/assets/mona-whisper.gif"/>
-
-###### ✮ I'm a Vigilante!
+Hi, there! I'm Akera <img height="30" src="https://raw.githubusercontent.com/ahkehra/ahkehra/main/assets/mona-whisper.gif"/> ✮ I'm a Vigilante!
 
 ![akera's github stats](https://github-readme-stats.vercel.app/api?username=ahkehra&bg_color=000&show_icons=true&count_private=true&hide_border=true&text_color=fffafa&title_color=ff0000&include_all_commits=true)
 
