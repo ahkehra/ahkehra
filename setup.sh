@@ -1,18 +1,37 @@
 #!/usr/bin/env bash
 
 # --- User Settings ---
-username="ahkehra"
-email="vishal.rockstar7011@gmail.com"
-default_directory="*"
-font_url="https://raw.githubusercontent.com/ahkehra/ahkehra/master/font.ttf"
-color_scheme_url="https://raw.githubusercontent.com/ahkehra/ahkehra/master/colors.prop"
-termux_properties_url="https://raw.githubusercontent.com/ahkehra/ahkehra/master/termux.prop"
-target_folder="$HOME/storage/downloads/Termux"
-
-# --- Helper Functions ---
 output_message() { echo -e "\033[1;31m$1\033[0m"; }  # Print message in red color
 disable_cursor() { setterm -cursor off; }
 enable_cursor_and_clear() { setterm -cursor on; clear; }
+
+# --- Prompt for Username and Email (Required) ---
+output_message "Please enter your GitHub username: "
+read username
+while [[ -z "$username" ]]; do
+    output_message "Username is required! Please enter your GitHub username: "
+    read username
+done
+output_message "Username entered: $username"
+
+output_message "Please enter your email address for GitHub: "
+read email
+while [[ -z "$email" ]]; do
+    output_message "Email is required! Please enter your email address for GitHub: "
+    read email
+done
+output_message "Email entered: $email"
+
+# --- Dynamic URL Assignment Based on Username ---
+font_url="https://raw.githubusercontent.com/$username/ahkehra/master/font.ttf"
+color_scheme_url="https://raw.githubusercontent.com/$username/ahkehra/master/colors.prop"
+termux_properties_url="https://raw.githubusercontent.com/$username/ahkehra/master/termux.prop"
+target_folder="$HOME/storage/downloads/Termux"
+
+# --- Check Required Commands ---
+command -v curl >/dev/null 2>&1 || { output_message "curl is required but not installed. Exiting..."; exit 1; }
+command -v git >/dev/null 2>&1 || { output_message "git is required but not installed. Exiting..."; exit 1; }
+command -v gh >/dev/null 2>&1 || { output_message "GitHub CLI (gh) is required but not installed. Exiting..."; exit 1; }
 
 # --- Start Setup ---
 output_message "Setting up Termux..."; clear; disable_cursor
@@ -21,6 +40,20 @@ output_message "Setting up Termux..."; clear; disable_cursor
 output_message "Syncing with fastest mirrors..."; pkg update -y &>/dev/null
 output_message "Upgrading installed packages..."; pkg upgrade -o Dpkg::Options::='--force-confnew' -y &>/dev/null
 output_message "Installing required packages (git, gh)..."; pkg install git gh -y &>/dev/null
+
+# --- Ask for Zsh Installation ---
+output_message "Do you want to install Zsh (y/n)?"
+read install_zsh
+if [[ "$install_zsh" == "y" || "$install_zsh" == "Y" ]]; then
+    output_message "Installing Zsh..."
+    pkg install zsh -y &>/dev/null
+    output_message "Zsh installed successfully."
+    output_message "Changing default shell to Zsh..."
+    chsh -s $(which zsh)
+    output_message "Default shell changed to Zsh. Please restart Termux for changes to take effect."
+else
+    output_message "Skipping Zsh installation."
+fi
 
 # --- Storage and Font Setup ---
 if [ ! -d "$HOME/storage" ]; then
@@ -50,7 +83,7 @@ if [ ! -f "$HOME/.gitconfig" ]; then
     git config --global core.editor "nano"
     
     if [ "$(id -u)" -ne 0 ]; then
-        git config --global --add safe.directory "$default_directory"
+        git config --global --add safe.directory "$HOME"
     fi
     
     # Check if the user is already authenticated
@@ -91,16 +124,23 @@ if [ ! -d "$target_folder" ]; then
     fi
 fi
 
-# --- Add Folder Navigation to .bashrc if Folder is Created ---
+# --- Add Folder Navigation to .bashrc or .zshrc if Folder is Created ---
 if [ "$folder_created" = true ]; then
-    output_message "Adding folder navigation to .bashrc..."
+    output_message "Adding folder navigation to the appropriate config file..."
 
-    # Check if the line already exists, if not, append it
-    if ! grep -q "cd $target_folder" ~/.bashrc; then
-        echo "cd $target_folder" >> ~/.bashrc
-        output_message "Successfully added folder navigation to .bashrc."
+    # Check if the user is using bash or zsh
+    if [ -n "$ZSH_VERSION" ]; then
+        shell_config="$HOME/.zshrc"
     else
-        output_message "Folder navigation already exists in .bashrc."
+        shell_config="$HOME/.bashrc"
+    fi
+    
+    # Check if the line already exists in the config file, if not, append it
+    if ! grep -q "cd $target_folder" "$shell_config"; then
+        echo "cd $target_folder" >> "$shell_config"
+        output_message "Successfully added folder navigation to $shell_config."
+    else
+        output_message "Folder navigation already exists in $shell_config."
     fi
 fi
 
