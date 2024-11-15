@@ -14,22 +14,6 @@ output_message() { echo -e "\033[1;31m$1\033[0m"; }  # Print message in red colo
 disable_cursor() { setterm -cursor off; }
 enable_cursor_and_clear() { setterm -cursor on; clear; }
 
-# --- Retry Function for Curl ---
-download_with_retry() {
-    local url=$1
-    local output=$2
-    local max_attempts=5
-    local attempt=1
-
-    while [[ $attempt -le $max_attempts ]]; do
-        output_message "Attempt $attempt to download from $url..."
-        curl -fsSL --limit-rate 1M -o "$output" "$url" && break
-        echo "Download failed, retrying..."
-        ((attempt++))
-        sleep 2
-    done
-}
-
 # --- Start Setup ---
 output_message "Setting up Termux..."; clear; disable_cursor
 
@@ -43,14 +27,20 @@ if [ ! -d "$HOME/storage" ]; then
     output_message "Setting up Termux storage access..."; termux-setup-storage
 fi
 
+# --- Ensure ~/.termux Directory Exists ---
+if [ ! -d "$HOME/.termux" ]; then
+    output_message "Creating ~/.termux directory for font and theme configuration..."
+    mkdir -p "$HOME/.termux"
+fi
+
+# --- Install Font if Not Present ---
 if [ ! -f "$HOME/.termux/font.ttf" ]; then
-    output_message "Downloading and installing custom font..."
-    download_with_retry "$font_url" "$HOME/.termux/font.ttf"
+    output_message "Downloading and installing custom font..."; curl -fsSL -o "$HOME/.termux/font.ttf" "$font_url"
 fi
 
 # --- Apply Color Scheme and Termux Properties ---
-output_message "Applying color scheme..."; curl -fsSL --limit-rate 1M -o "$HOME/.termux/colors.properties" "$color_scheme_url"
-output_message "Configuring Termux extra keys..."; curl -fsSL --limit-rate 1M -o "$HOME/.termux/termux.properties" "$termux_properties_url"
+output_message "Applying color scheme..."; curl -fsSL -o "$HOME/.termux/colors.properties" "$color_scheme_url"
+output_message "Configuring Termux extra keys..."; curl -fsSL -o "$HOME/.termux/termux.properties" "$termux_properties_url"
 
 # --- Git Configuration and Authentication ---
 if [ ! -f "$HOME/.gitconfig" ]; then
