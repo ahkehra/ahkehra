@@ -76,8 +76,6 @@ if [ ! -f "$HOME/.gitconfig" ]; then
 fi
 
 # --- Folder Check, Creation & Navigation ---
-folder_created=false  # Flag to track if the folder was created
-
 if [ ! -d "$target_folder" ]; then
     output_message "Folder $target_folder does not exist."
     output_message "Do you want to create it? (y/n):"
@@ -89,6 +87,7 @@ if [ ! -d "$target_folder" ]; then
         folder_created=true  # Set flag to true if folder is created
     else
         output_message "Skipping folder creation."
+        folder_created=false
     fi
 fi
 
