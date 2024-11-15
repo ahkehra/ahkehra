@@ -63,10 +63,25 @@ if [ ! -f "$HOME/.gitconfig" ]; then
         git config --global --add safe.directory "$default_directory"
     fi
     
-    # GitHub Authentication using Personal Access Token (PAT)
-    if [ ! -f "$HOME/.config/gh" ]; then
-        output_message "Authenticating with GitHub using Personal Access Token (PAT)..."
-        echo -e "$github_token" | gh auth login --with-token
+    # Check if the user is already authenticated
+    if ! gh auth status &>/dev/null; then
+        output_message "You are not logged in to GitHub. Starting GitHub authentication..."
+
+        # Start the GitHub authentication process with the web flow
+        output_message "Run 'gh auth login' in the terminal and follow the prompts to authenticate using your browser."
+        
+        # Give the user instructions
+        output_message "The following steps will guide you through the authentication process:"
+        output_message "1. Choose 'Login with a web browser' when prompted."
+        output_message "2. Visit the URL provided in your browser (e.g., https://github.com/login/device)."
+        output_message "3. Enter the code displayed in your terminal after visiting the URL."
+        output_message "4. After successful login, return to the terminal."
+        
+        output_message "Once you're logged in, the script will continue. Press Enter to proceed after completing the login."
+        read -p "Press Enter to continue after authentication..."
+
+        # Try to login with the web flow and ensure it's successful
+        gh auth login
     fi
 fi
 
