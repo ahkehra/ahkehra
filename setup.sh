@@ -14,6 +14,22 @@ output_message() { echo -e "\033[1;31m$1\033[0m"; }  # Print message in red colo
 disable_cursor() { setterm -cursor off; }
 enable_cursor_and_clear() { setterm -cursor on; clear; }
 
+# --- Retry Function for Curl ---
+download_with_retry() {
+    local url=$1
+    local output=$2
+    local max_attempts=5
+    local attempt=1
+
+    while [[ $attempt -le $max_attempts ]]; do
+        output_message "Attempt $attempt to download from $url..."
+        curl -fsSL --limit-rate 1M -o "$output" "$url" && break
+        echo "Download failed, retrying..."
+        ((attempt++))
+        sleep 2
+    done
+}
+
 # --- Start Setup ---
 output_message "Setting up Termux..."; clear; disable_cursor
 
@@ -28,12 +44,13 @@ if [ ! -d "$HOME/storage" ]; then
 fi
 
 if [ ! -f "$HOME/.termux/font.ttf" ]; then
-    output_message "Downloading and installing custom font..."; curl -fsSL -o "$HOME/.termux/font.ttf" "$font_url"
+    output_message "Downloading and installing custom font..."
+    download_with_retry "$font_url" "$HOME/.termux/font.ttf"
 fi
 
 # --- Apply Color Scheme and Termux Properties ---
-output_message "Applying color scheme..."; curl -fsSL -o "$HOME/.termux/colors.properties" "$color_scheme_url"
-output_message "Configuring Termux extra keys..."; curl -fsSL -o "$HOME/.termux/termux.properties" "$termux_properties_url"
+output_message "Applying color scheme..."; curl -fsSL --limit-rate 1M -o "$HOME/.termux/colors.properties" "$color_scheme_url"
+output_message "Configuring Termux extra keys..."; curl -fsSL --limit-rate 1M -o "$HOME/.termux/termux.properties" "$termux_properties_url"
 
 # --- Git Configuration and Authentication ---
 if [ ! -f "$HOME/.gitconfig" ]; then
@@ -46,8 +63,10 @@ if [ ! -f "$HOME/.gitconfig" ]; then
         git config --global --add safe.directory "$default_directory"
     fi
     
+    # GitHub Authentication using Personal Access Token (PAT)
     if [ ! -f "$HOME/.config/gh" ]; then
-        output_message "Logging into GitHub..."; gh auth login &>/dev/null
+        output_message "Authenticating with GitHub using Personal Access Token (PAT)..."
+        echo -e "$github_token" | gh auth login --with-token
     fi
 fi
 
