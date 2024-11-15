@@ -7,9 +7,10 @@ default_directory="*"
 font_url="https://raw.githubusercontent.com/ahkehra/ahkehra/master/font.ttf"
 color_scheme_url="https://raw.githubusercontent.com/ahkehra/ahkehra/master/colors.prop"
 termux_properties_url="https://raw.githubusercontent.com/ahkehra/ahkehra/master/termux.prop"
+target_folder="$HOME/storage/downloads/Termux"
 
 # --- Helper Functions ---
-output_message() { echo -e "\033[1;31m$1\033[0m"; }
+output_message() { echo -e "\033[1;31m$1\033[0m"; }  # Print message in red color
 disable_cursor() { setterm -cursor off; }
 enable_cursor_and_clear() { setterm -cursor on; clear; }
 
@@ -48,6 +49,34 @@ if [ ! -f "$HOME/.gitconfig" ]; then
     if [ ! -f "$HOME/.config/gh" ]; then
         output_message "Logging into GitHub..."; gh auth login &>/dev/null
     fi
+fi
+
+# --- Check if Folder Exists, Create it or Enter it ---
+if [ -d "$target_folder" ]; then
+    output_message "Entering the folder $target_folder..."
+    cd "$target_folder"
+else
+    output_message "Folder $target_folder does not exist. Do you want to create it? (y/n):"
+    read user_input
+    if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
+        output_message "Creating the folder..."
+        mkdir -p "$target_folder"
+        output_message "Created the folder $target_folder, now entering..."
+        cd "$target_folder"
+    else
+        output_message "Skipping folder creation. Exiting..."
+    fi
+fi
+
+# --- Add Folder Navigation to .bashrc ---
+output_message "Adding folder navigation to .bashrc..."
+
+# Check if the line already exists, if not, append it
+if ! grep -q "cd $target_folder" ~/.bashrc; then
+    echo "cd $target_folder" >> ~/.bashrc
+    output_message "Successfully added folder navigation to .bashrc."
+else
+    output_message "Folder navigation already exists in .bashrc."
 fi
 
 # --- Finish Setup ---
