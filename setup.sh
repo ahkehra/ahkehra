@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-username="oiakera"
+username="ahkehra"
 email="vishal.rockstar7011@gmail.com"
 editor="nano"
 dir="*"
@@ -31,16 +31,16 @@ fi
 # Installing the Ubuntu font for Termux.
 if [ ! -f $HOME/.termux/font.ttf ]; then
     echo -n -e "Installing Ubuntu font."
-    curl -fsSL -o $HOME/.termux/font.ttf 'https://raw.githubusercontent.com/oiakera/oiakera/master/font.ttf'
+    curl -fsSL -o $HOME/.termux/font.ttf 'https://raw.githubusercontent.com/ahkehra/ahkehra/master/font.ttf'
 fi
 
 # Set a default color scheme.
 echo -n -e "Setting up a new color scheme."
-curl -fsSL -o $HOME/.termux/colors.properties 'https://raw.githubusercontent.com/oiakera/oiakera/master/colors.prop'
+curl -fsSL -o $HOME/.termux/colors.properties 'https://raw.githubusercontent.com/ahkehra/ahkehra/master/colors.prop'
 
 # Add new buttons to the Termux bottom bar.
 echo -n -e "Setting up some extra keys in Termux."
-curl -fsSL -o $HOME/.termux/termux.properties 'https://raw.githubusercontent.com/oiakera/oiakera/master/termux.prop'
+curl -fsSL -o $HOME/.termux/termux.properties 'https://raw.githubusercontent.com/ahkehra/ahkehra/master/termux.prop'
 
 # Setup git credentials
 echo -n -e "Setting up Git Credentials in Termux."
