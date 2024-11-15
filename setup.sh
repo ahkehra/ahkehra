@@ -70,32 +70,34 @@ if [ ! -f "$HOME/.gitconfig" ]; then
     fi
 fi
 
-# --- Check if Folder Exists, Create it or Enter it ---
-if [ -d "$target_folder" ]; then
-    output_message "Entering the folder $target_folder..."
-    cd "$target_folder"
-else
-    output_message "Folder $target_folder does not exist. Do you want to create it? (y/n):"
-    read user_input
-    if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
-        output_message "Creating the folder..."
+# --- Folder Check, Creation & Navigation ---
+folder_created=false  # Flag to track if the folder was created
+
+if [ ! -d "$target_folder" ]; then
+    output_message "Folder $target_folder does not exist."
+    output_message "Do you want to create it? (y/n):"
+    read create_folder_choice
+    if [[ "$create_folder_choice" == "y" || "$create_folder_choice" == "Y" ]]; then
+        output_message "Creating folder $target_folder..."
         mkdir -p "$target_folder"
-        output_message "Created the folder $target_folder, now entering..."
-        cd "$target_folder"
+        output_message "Folder $target_folder created."
+        folder_created=true  # Set flag to true if folder is created
     else
-        output_message "Skipping folder creation. Exiting..."
+        output_message "Skipping folder creation."
     fi
 fi
 
-# --- Add Folder Navigation to .bashrc ---
-output_message "Adding folder navigation to .bashrc..."
+# --- Add Folder Navigation to .bashrc if Folder is Created ---
+if [ "$folder_created" = true ]; then
+    output_message "Adding folder navigation to .bashrc..."
 
-# Check if the line already exists, if not, append it
-if ! grep -q "cd $target_folder" ~/.bashrc; then
-    echo "cd $target_folder" >> ~/.bashrc
-    output_message "Successfully added folder navigation to .bashrc."
-else
-    output_message "Folder navigation already exists in .bashrc."
+    # Check if the line already exists, if not, append it
+    if ! grep -q "cd $target_folder" ~/.bashrc; then
+        echo "cd $target_folder" >> ~/.bashrc
+        output_message "Successfully added folder navigation to .bashrc."
+    else
+        output_message "Folder navigation already exists in .bashrc."
+    fi
 fi
 
 # --- Finish Setup ---
