@@ -28,32 +28,78 @@ color_scheme_url="https://raw.githubusercontent.com/$username/ahkehra/master/col
 termux_properties_url="https://raw.githubusercontent.com/$username/ahkehra/master/termux.prop"
 target_folder="$HOME/storage/downloads/Termux"
 
-# --- Check Required Commands ---
-command -v curl >/dev/null 2>&1 || { output_message "curl is required but not installed. Exiting..."; exit 1; }
-command -v git >/dev/null 2>&1 || { output_message "git is required but not installed. Exiting..."; exit 1; }
-command -v gh >/dev/null 2>&1 || { output_message "GitHub CLI (gh) is required but not installed. Exiting..."; exit 1; }
+# --- Package List (Permanent and Optional) ---
+packages=("curl" "git" "gh" "zsh")  # Required permanent packages
+
+# --- Unified Package Installation, System Update, and Optional Package Addition ---
+setup_system() {
+    # Ask if the user wants to update the system
+    output_message "Do you want to update the system and sync the package repositories? (y/n)"
+    read update_choice
+    if [[ "$update_choice" == "y" || "$update_choice" == "Y" ]]; then
+        output_message "Syncing with fastest mirrors..."; pkg update -y &>/dev/null
+        output_message "Upgrading installed packages..."; pkg upgrade -o Dpkg::Options::='--force-confnew' -y &>/dev/null
+    else
+        output_message "Skipping system update and upgrade."
+    fi
+
+    # Install required permanent packages
+    output_message "Installing required packages..."
+    for package in "${packages[@]}"; do
+        command -v "$package" >/dev/null 2>&1 || {
+            output_message "$package is not installed. Installing..."
+            if pkg install "$package" -y &>/dev/null; then
+                output_message "$package installed successfully."
+            else
+                output_message "Failed to install $package. Please try again."
+                exit 1
+            fi
+        }
+    done
+
+    # Ask for additional packages from the user
+    output_message "Do you want to install additional packages? (y/n)"
+    read install_new_packages
+    if [[ "$install_new_packages" == "y" || "$install_new_packages" == "Y" ]]; then
+        output_message "Enter the package names you want to install (separated by spaces):"
+        read -a optional_packages
+        for package in "${optional_packages[@]}"; do
+            output_message "Installing $package..."
+            if pkg install "$package" -y &>/dev/null; then
+                output_message "$package installed successfully."
+            else
+                output_message "Failed to install $package."
+            fi
+        done
+    else
+        output_message "Skipping additional package installation."
+    fi
+}
+
+# --- Install Zsh Option ---
+install_zsh() {
+    output_message "Do you want to install Zsh (y/n)?"
+    read install_zsh
+    if [[ "$install_zsh" == "y" || "$install_zsh" == "Y" ]]; then
+        output_message "Installing Zsh..."
+        if pkg install zsh -y &>/dev/null; then
+            output_message "Zsh installed successfully."
+            output_message "Changing default shell to Zsh..."
+            chsh -s $(which zsh)
+            output_message "Default shell changed to Zsh. Please restart Termux for changes to take effect."
+        else
+            output_message "Failed to install Zsh."
+        fi
+    else
+        output_message "Skipping Zsh installation."
+    fi
+}
 
 # --- Start Setup ---
 output_message "Setting up Termux..."; clear; disable_cursor
 
-# --- Package and System Updates ---
-output_message "Syncing with fastest mirrors..."; pkg update -y &>/dev/null
-output_message "Upgrading installed packages..."; pkg upgrade -o Dpkg::Options::='--force-confnew' -y &>/dev/null
-output_message "Installing required packages (git, gh)..."; pkg install git gh -y &>/dev/null
-
-# --- Ask for Zsh Installation ---
-output_message "Do you want to install Zsh (y/n)?"
-read install_zsh
-if [[ "$install_zsh" == "y" || "$install_zsh" == "Y" ]]; then
-    output_message "Installing Zsh..."
-    pkg install zsh -y &>/dev/null
-    output_message "Zsh installed successfully."
-    output_message "Changing default shell to Zsh..."
-    chsh -s $(which zsh)
-    output_message "Default shell changed to Zsh. Please restart Termux for changes to take effect."
-else
-    output_message "Skipping Zsh installation."
-fi
+# --- Run System Setup, Updates, and Package Installation ---
+setup_system  # Update system, install required packages, and optional packages
 
 # --- Storage and Font Setup ---
 if [ ! -d "$HOME/storage" ]; then
@@ -105,6 +151,15 @@ if [ ! -f "$HOME/.gitconfig" ]; then
 
         # Try to login with the web flow and ensure it's successful
         gh auth login
+
+        if gh auth status &>/dev/null; then
+            output_message "GitHub authentication successful."
+        else
+            output_message "GitHub authentication failed. Please try again."
+            exit 1
+        fi
+    else
+        output_message "Already logged in to GitHub."
     fi
 fi
 
