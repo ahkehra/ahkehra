@@ -1,73 +1,54 @@
 #!/usr/bin/env bash
+
+# --- User Settings ---
 username="ahkehra"
 email="vishal.rockstar7011@gmail.com"
-editor="nano"
-dir="*"
+default_directory="*"
+font_url="https://raw.githubusercontent.com/ahkehra/ahkehra/master/font.ttf"
+color_scheme_url="https://raw.githubusercontent.com/ahkehra/ahkehra/master/colors.prop"
+termux_properties_url="https://raw.githubusercontent.com/ahkehra/ahkehra/master/termux.prop"
 
-# Clear the screen
-clear
+# --- Helper Functions ---
+output_message() { echo -e "\033[1;31m$1\033[0m"; }
+disable_cursor() { setterm -cursor off; }
+enable_cursor_and_clear() { setterm -cursor on; clear; }
 
-# Turn off cursor.
-setterm -cursor off
+# --- Start Setup ---
+output_message "Setting up Termux..."; clear; disable_cursor
 
-# Get fastest mirrors.
-echo -n -e "Syncing with fastest mirrors."
-pkg update -y
+# --- Package and System Updates ---
+output_message "Syncing with fastest mirrors..."; pkg update -y &>/dev/null
+output_message "Upgrading installed packages..."; pkg upgrade -o Dpkg::Options::='--force-confnew' -y &>/dev/null
+output_message "Installing required packages (git, gh)..."; pkg install git gh -y &>/dev/null
 
-# Upgrade packages.
-echo -n -e "Upgrading packages."
-pkg upgrade -o Dpkg::Options::='--force-confnew' -y 2>/dev/null
-
-# Updating package repositories and installing packages.
-echo -n -e "Installing required packages."
-pkg install git gh -y
-
-# Giving Storage permision to Termux App.
-if [ ! -d $HOME/storage ]; then
-    echo -n -e "Setting up storage access for Termux."
-    termux-setup-storage
+# --- Storage and Font Setup ---
+if [ ! -d "$HOME/storage" ]; then
+    output_message "Setting up Termux storage access..."; termux-setup-storage
 fi
 
-# Installing the Ubuntu font for Termux.
-if [ ! -f $HOME/.termux/font.ttf ]; then
-    echo -n -e "Installing Ubuntu font."
-    curl -fsSL -o $HOME/.termux/font.ttf 'https://raw.githubusercontent.com/ahkehra/ahkehra/master/font.ttf'
+if [ ! -f "$HOME/.termux/font.ttf" ]; then
+    output_message "Downloading and installing custom font..."; curl -fsSL -o "$HOME/.termux/font.ttf" "$font_url"
 fi
 
-# Set a default color scheme.
-echo -n -e "Setting up a new color scheme."
-curl -fsSL -o $HOME/.termux/colors.properties 'https://raw.githubusercontent.com/ahkehra/ahkehra/master/colors.prop'
+# --- Apply Color Scheme and Termux Properties ---
+output_message "Applying color scheme..."; curl -fsSL -o "$HOME/.termux/colors.properties" "$color_scheme_url"
+output_message "Configuring Termux extra keys..."; curl -fsSL -o "$HOME/.termux/termux.properties" "$termux_properties_url"
 
-# Add new buttons to the Termux bottom bar.
-echo -n -e "Setting up some extra keys in Termux."
-curl -fsSL -o $HOME/.termux/termux.properties 'https://raw.githubusercontent.com/ahkehra/ahkehra/master/termux.prop'
-
-# Setup git credentials
-echo -n -e "Setting up Git Credentials in Termux."
-if [ ! -f $HOME/.gitconfig ]; then
-     git config --global user.name "${username}"
-     git config --global user.email "${email}"
-     git config --global core.editor "${editor}"
-     if [ "$(id -u)" -ne 0 ]; then
-          git config --global --add safe.directory "${dir}"
+# --- Git Configuration and Authentication ---
+if [ ! -f "$HOME/.gitconfig" ]; then
+    output_message "Setting up Git configuration..."; 
+    git config --global user.name "$username"
+    git config --global user.email "$email"
+    git config --global core.editor "nano"
+    
+    if [ "$(id -u)" -ne 0 ]; then
+        git config --global --add safe.directory "$default_directory"
     fi
-    if [ ! -f $HOME/.config/gh ]; then
-        gh auth login
+    
+    if [ ! -f "$HOME/.config/gh" ]; then
+        output_message "Logging into GitHub..."; gh auth login &>/dev/null
     fi
 fi
-echo -n -e "Successfully updated Git Credentials"
 
-# Reload Termux settings.
-termux-reload-settings
-
-# Setup complete.
-echo -n -e "Installation complete!"
-
-# Restore cursor.
-setterm -cursor on
-
-# Clear the screen
-clear
-
-# Setup finished
-exit
+# --- Finish Setup ---
+output_message "Setup completed successfully!"; enable_cursor_and_clear; exit 0
