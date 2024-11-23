@@ -29,7 +29,7 @@ termux_properties_url="https://raw.githubusercontent.com/$username/ahkehra/maste
 target_folder="$HOME/storage/downloads/Termux"
 
 # --- Package List (Permanent and Optional) ---
-packages=("curl" "git" "gh" "zsh")  # Required permanent packages
+packages=("curl" "git" "gh")  # Required permanent packages
 
 # --- Unified Package Installation, System Update, and Optional Package Addition ---
 setup_system() {
