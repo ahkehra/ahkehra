@@ -202,9 +202,6 @@ fi
 # --- Finish Setup ---
 output_message "Setup completed successfully!"; enable_cursor_and_clear
 
-# --- Restart Termux Automatically ---
-output_message "Restarting Termux to apply all changes..."
-killall com.termux
-sleep 2
-am start --user 0 -n com.termux/.HomeActivity
+# --- Restart Termux ---
+output_message "Restart Termux to apply all changes..."
 exit 0
