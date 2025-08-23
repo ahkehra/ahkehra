@@ -1,207 +1,240 @@
 #!/usr/bin/env bash
 
-# --- User Settings ---
-output_message() { echo -e "\033[1;31m$1\033[0m"; }  # Print message in red color
+# --- Output helper ---
+output_message() { echo -e "\033[1;32m$1\033[0m"; }  # Green
+error_message() { echo -e "\033[1;31m$1\033[0m"; }  # Red
 disable_cursor() { setterm -cursor off; }
 enable_cursor_and_clear() { setterm -cursor on; clear; }
 
-# --- Prompt for Username and Email (Required) ---
-output_message "Please enter your GitHub username: "
-read username
-while [[ -z "$username" ]]; do
-    output_message "Username is required! Please enter your GitHub username: "
-    read username
+# --- Defaults for auto mode ---
+AUTO_MODE=false
+AUTO_USERNAME="${GIT_USERNAME:-myuser}"
+AUTO_EMAIL="${GIT_EMAIL:-myuser@example.com}"
+AUTO_EXTRA="${GIT_EXTRA:-}"
+AUTO_INSTALL_ZSH="${INSTALL_ZSH:-true}"
+TARGET_FOLDER="$HOME/storage/downloads/Termux"
+
+# --- Parse arguments ---
+for arg in "$@"; do
+    case $arg in
+        --auto) AUTO_MODE=true ;;
+    esac
 done
-output_message "Username entered: $username"
 
-output_message "Please enter your email address for GitHub: "
-read email
-while [[ -z "$email" ]]; do
-    output_message "Email is required! Please enter your email address for GitHub: "
-    read email
-done
-output_message "Email entered: $email"
-
-# --- Dynamic URL Assignment Based on Username ---
-font_url="https://raw.githubusercontent.com/$username/ahkehra/master/font.ttf"
-color_scheme_url="https://raw.githubusercontent.com/$username/ahkehra/master/colors.prop"
-termux_properties_url="https://raw.githubusercontent.com/$username/ahkehra/master/termux.prop"
-target_folder="$HOME/storage/downloads/Termux"
-
-# --- Package List (Permanent and Optional) ---
-packages=("curl" "git" "gh")  # Required permanent packages
-
-# --- Unified Package Installation, System Update, and Optional Package Addition ---
-setup_system() {
-    # Ask if the user wants to update the system
-    output_message "Do you want to update the system and sync the package repositories? (y/n)"
-    read update_choice
-    if [[ "$update_choice" == "y" || "$update_choice" == "Y" ]]; then
-        output_message "Syncing with fastest mirrors..."; pkg update -y &>/dev/null
-        output_message "Upgrading installed packages..."; pkg upgrade -o Dpkg::Options::='--force-confnew' -y &>/dev/null
+# --- Prompt for Username ---
+get_username() {
+    if $AUTO_MODE; then
+        username="$AUTO_USERNAME"
+        git config --global user.name "$username"
+        output_message "✅ Username set (auto): $username"
     else
-        output_message "Skipping system update and upgrade."
-    fi
-
-    # Install required permanent packages
-    output_message "Installing required packages..."
-    for package in "${packages[@]}"; do
-        command -v "$package" >/dev/null 2>&1 || {
-            output_message "$package is not installed. Installing..."
-            if pkg install "$package" -y &>/dev/null; then
-                output_message "$package installed successfully."
+        while true; do
+            output_message "Enter your GitHub username:"
+            read username
+            if [ -n "$username" ]; then
+                git config --global user.name "$username"
+                output_message "✅ Username set: $username"
+                break
             else
-                output_message "Failed to install $package. Please try again."
-                exit 1
-            fi
-        }
-    done
-
-    # Ask for additional packages from the user
-    output_message "Do you want to install additional packages? (y/n)"
-    read install_new_packages
-    if [[ "$install_new_packages" == "y" || "$install_new_packages" == "Y" ]]; then
-        output_message "Enter the package names you want to install (separated by spaces):"
-        read -a optional_packages
-        for package in "${optional_packages[@]}"; do
-            output_message "Installing $package..."
-            if pkg install "$package" -y &>/dev/null; then
-                output_message "$package installed successfully."
-            else
-                output_message "Failed to install $package."
+                error_message "Username cannot be empty. Please try again."
             fi
         done
-    else
-        output_message "Skipping additional package installation."
     fi
 }
 
-# --- Install Zsh Option ---
-install_zsh() {
-    output_message "Do you want to install Zsh (y/n)?"
-    read install_zsh
-    if [[ "$install_zsh" == "y" || "$install_zsh" == "Y" ]]; then
-        output_message "Installing Zsh..."
-        if pkg install zsh -y &>/dev/null; then
-            output_message "Zsh installed successfully."
-            output_message "Changing default shell to Zsh..."
-            chsh -s $(which zsh)
-            output_message "Default shell changed to Zsh. Please restart Termux for changes to take effect."
-        else
-            output_message "Failed to install Zsh."
+# --- Prompt for Email ---
+get_email() {
+    if $AUTO_MODE; then
+        email="$AUTO_EMAIL"
+        git config --global user.email "$email"
+        output_message "✅ Email set (auto): $email"
+    else
+        while true; do
+            output_message "Enter your GitHub email:"
+            read email
+            if [ -n "$email" ]; then
+                git config --global user.email "$email"
+                output_message "✅ Email set: $email"
+                break
+            else
+                error_message "Email cannot be empty. Please try again."
+            fi
+        done
+    fi
+}
+
+# --- Git Extras (optional) ---
+get_extras() {
+    if $AUTO_MODE; then
+        if [ -n "$AUTO_EXTRA" ]; then
+            eval git config --global $AUTO_EXTRA
+            output_message "Extras applied (auto): $AUTO_EXTRA"
         fi
     else
-        output_message "Skipping Zsh installation."
+        output_message "Enter any extra Git config (or press Enter to skip):"
+        read extras
+        if [ -n "$extras" ]; then
+            eval git config --global $extras
+            output_message "Extras applied: $extras"
+        else
+            output_message "No extras added."
+        fi
     fi
 }
 
-# --- Start Setup ---
-output_message "Setting up Termux..."; clear; disable_cursor
+# --- System Setup ---
+setup_system() {
+    packages=("curl" "git" "gh")
 
-# --- Run System Setup, Updates, and Package Installation ---
-setup_system  # Update system, install required packages, and optional packages
+    if $AUTO_MODE; then
+        output_message "🔄 Updating system (auto)..."
+        pkg update -y &>/dev/null
+        pkg upgrade -o Dpkg::Options::='--force-confnew' -y &>/dev/null
+    else
+        output_message "Do you want to update the system and sync repositories? (y/n)"
+        read update_choice
+        if [[ "$update_choice" =~ ^[Yy]$ ]]; then
+            pkg update -y &>/dev/null
+            pkg upgrade -o Dpkg::Options::='--force-confnew' -y &>/dev/null
+        fi
+    fi
 
-# --- Storage and Font Setup ---
-if [ ! -d "$HOME/storage" ]; then
-    output_message "Setting up Termux storage access..."; termux-setup-storage
-fi
+    output_message "Installing required packages..."
+    for package in "${packages[@]}"; do
+        if ! command -v "$package" >/dev/null 2>&1; then
+            pkg install "$package" -y &>/dev/null || {
+                error_message "Failed to install $package"
+                exit 1
+            }
+        fi
+    done
 
-# --- Ensure ~/.termux Directory Exists ---
-if [ ! -d "$HOME/.termux" ]; then
-    output_message "Creating ~/.termux directory for font and theme configuration..."
+    if ! $AUTO_MODE; then
+        output_message "Do you want to install extra packages? (y/n)"
+        read extra_choice
+        if [[ "$extra_choice" =~ ^[Yy]$ ]]; then
+            output_message "Enter packages separated by spaces:"
+            read -a optional_packages
+            for package in "${optional_packages[@]}"; do
+                pkg install "$package" -y &>/dev/null || error_message "Failed to install $package"
+            done
+        fi
+    fi
+}
+
+# --- Zsh Install ---
+get_zsh_choice() {
+    if $AUTO_MODE; then
+        if [ "$AUTO_INSTALL_ZSH" = "true" ]; then
+            pkg install zsh -y &>/dev/null
+            chsh -s "$(which zsh)"
+            output_message "✅ Zsh installed and set as default shell (auto)."
+        else
+            output_message "Skipping Zsh install (auto)."
+        fi
+    else
+        while true; do
+            output_message "Do you want to set Zsh as default shell? (y/n):"
+            read zsh_choice
+            case "$zsh_choice" in
+                y|Y)
+                    pkg install zsh -y &>/dev/null
+                    chsh -s "$(which zsh)"
+                    output_message "✅ Zsh installed and set as default shell."
+                    break ;;
+                n|N)
+                    output_message "Skipping Zsh installation."
+                    break ;;
+                *) error_message "Invalid choice. Please enter y or n." ;;
+            esac
+        done
+    fi
+}
+
+# --- GitHub Login ---
+github_login() {
+    if gh auth status &>/dev/null; then
+        output_message "✅ Already logged in to GitHub."
+    else
+        if $AUTO_MODE; then
+            output_message "Skipping GitHub login in auto mode. Run 'gh auth login' manually if needed."
+        else
+            gh auth login --web --git-protocol https --hostname github.com
+        fi
+    fi
+}
+
+# --- Root Check ---
+check_root() {
+    if [ "$(id -u)" -eq 0 ]; then
+        output_message "⚡ Root detected. Full folder access available."
+    else
+        output_message "ℹ️ No root detected. Using Termux shared storage."
+    fi
+}
+
+# --- Fonts and Theme ---
+setup_fonts_themes() {
+    font_url="https://raw.githubusercontent.com/$username/ahkehra/master/font.ttf"
+    color_scheme_url="https://raw.githubusercontent.com/$username/ahkehra/master/colors.prop"
+    termux_properties_url="https://raw.githubusercontent.com/$username/ahkehra/master/termux.prop"
+
+    if [ ! -d "$HOME/storage" ]; then
+        termux-setup-storage
+    fi
+
     mkdir -p "$HOME/.termux"
-fi
+    curl -fsSL -o "$HOME/.termux/font.ttf" "$font_url"
+    curl -fsSL -o "$HOME/.termux/colors.properties" "$color_scheme_url"
+    curl -fsSL -o "$HOME/.termux/termux.properties" "$termux_properties_url"
+}
 
-# --- Install Font if Not Present ---
-if [ ! -f "$HOME/.termux/font.ttf" ]; then
-    output_message "Downloading and installing custom font..."; curl -fsSL -o "$HOME/.termux/font.ttf" "$font_url"
-fi
-
-# --- Apply Color Scheme and Termux Properties ---
-output_message "Applying color scheme..."; curl -fsSL -o "$HOME/.termux/colors.properties" "$color_scheme_url"
-output_message "Configuring Termux extra keys..."; curl -fsSL -o "$HOME/.termux/termux.properties" "$termux_properties_url"
-
-# --- Git Configuration and Authentication ---
-if [ ! -f "$HOME/.gitconfig" ]; then
-    output_message "Setting up Git configuration..."; 
-    git config --global user.name "$username"
-    git config --global user.email "$email"
-    git config --global core.editor "nano"
-    
-    if [ "$(id -u)" -ne 0 ]; then
-        git config --global --add safe.directory "$HOME"
-    fi
-    
-    # Check if the user is already authenticated
-    if ! gh auth status &>/dev/null; then
-        output_message "You are not logged in to GitHub. Starting GitHub authentication..."
-
-        # Start the GitHub authentication process with the web flow
-        output_message "Run 'gh auth login' in the terminal and follow the prompts to authenticate using your browser."
-        
-        # Give the user instructions
-        output_message "The following steps will guide you through the authentication process:"
-        output_message "1. Choose 'Login with a web browser' when prompted."
-        output_message "2. Visit the URL provided in your browser (e.g., https://github.com/login/device)."
-        output_message "3. Enter the code displayed in your terminal after visiting the URL."
-        output_message "4. After successful login, return to the terminal."
-        
-        output_message "Once you're logged in, the script will continue. Press Enter to proceed after completing the login."
-        read -p "Press Enter to continue after authentication..."
-
-        # Try to login with the web flow and ensure it's successful
-        gh auth login
-
-        if gh auth status &>/dev/null; then
-            output_message "GitHub authentication successful."
+# --- Folder Setup ---
+setup_folder() {
+    if [ ! -d "$TARGET_FOLDER" ]; then
+        if $AUTO_MODE; then
+            mkdir -p "$TARGET_FOLDER"
+            output_message "✅ Folder created (auto): $TARGET_FOLDER"
         else
-            output_message "GitHub authentication failed. Please try again."
-            exit 1
+            output_message "Folder $TARGET_FOLDER does not exist. Create it? (y/n)"
+            read create_folder_choice
+            if [[ "$create_folder_choice" =~ ^[Yy]$ ]]; then
+                mkdir -p "$TARGET_FOLDER"
+                output_message "✅ Folder created: $TARGET_FOLDER"
+            fi
         fi
-    else
-        output_message "Already logged in to GitHub."
     fi
-fi
 
-# --- Folder Check, Creation & Navigation ---
-if [ ! -d "$target_folder" ]; then
-    output_message "Folder $target_folder does not exist."
-    output_message "Do you want to create it? (y/n):"
-    read create_folder_choice
-    if [[ "$create_folder_choice" == "y" || "$create_folder_choice" == "Y" ]]; then
-        output_message "Creating folder $target_folder..."
-        mkdir -p "$target_folder"
-        output_message "Folder $target_folder created."
-        folder_created=true  # Set flag to true if folder is created
-    else
-        output_message "Skipping folder creation."
-        folder_created=false
-    fi
-fi
-
-# --- Add Folder Navigation to .bashrc or .zshrc if Folder is Created ---
-if [ "$folder_created" = true ]; then
-    output_message "Adding folder navigation to the appropriate config file..."
-
-    # Check if the user is using bash or zsh
     if [ -n "$ZSH_VERSION" ]; then
         shell_config="$HOME/.zshrc"
     else
         shell_config="$HOME/.bashrc"
     fi
-    
-    # Check if the line already exists in the config file, if not, append it
-    if ! grep -q "cd $target_folder" "$shell_config"; then
-        echo "cd $target_folder" >> "$shell_config"
-        output_message "Successfully added folder navigation to $shell_config."
-    else
-        output_message "Folder navigation already exists in $shell_config."
+
+    if ! grep -q "cd $TARGET_FOLDER" "$shell_config"; then
+        echo "cd $TARGET_FOLDER" >> "$shell_config"
+        output_message "✅ Auto-navigation added to $shell_config."
     fi
-fi
+}
 
-# --- Finish Setup ---
-output_message "Setup completed successfully!"; enable_cursor_and_clear
+# --- Main Execution ---
+clear; disable_cursor
+output_message "🚀 Starting Termux setup..."
 
-# --- Restart Termux ---
-output_message "Restart Termux to apply all changes..."
+get_username
+get_email
+
+git config --global core.editor "nano"
+git config --global --add safe.directory "$HOME"
+
+get_extras
+setup_system
+get_zsh_choice
+github_login
+check_root
+setup_fonts_themes
+setup_folder
+
+enable_cursor_and_clear
+output_message "✅ Setup completed successfully! Please restart Termux."
 exit 0
